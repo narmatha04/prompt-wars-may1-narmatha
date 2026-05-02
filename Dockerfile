@@ -1,16 +1,8 @@
-FROM node:22-alpine AS build
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
-
-COPY . .
-RUN npm run build
-
+# This Dockerfile expects the React app to be pre-built by CI (npm run build)
+# The dist/ folder is copied in directly — secrets are already baked into the bundle by GitHub Actions
 FROM nginx:alpine
 
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 8080
