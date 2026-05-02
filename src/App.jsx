@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, lazy, Suspense, useEffect, useCallback } from 'react';
 import './index.css';
 import TaskBoard from './components/TaskBoard/TaskBoard';
 import LandingPage from './components/Auth/LandingPage';
@@ -6,7 +6,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { useTheme } from './context/ThemeContext';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { useEffect } from 'react';
 
 // Lazy-load the AI assistant to improve initial page load performance
 const AIAssistant = lazy(() => import('./components/AIAssistant/AIAssistant'));
@@ -31,13 +30,13 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     try {
       await signOut(auth);
     } catch (error) {
       console.error('Error signing out:', error);
     }
-  };
+  }, []);
 
   if (loading) {
     return (
