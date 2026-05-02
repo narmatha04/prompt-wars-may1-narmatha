@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AIAssistant from './AIAssistant';
 
-// Mock the Gemini SDK with a proper class constructor
 vi.mock('@google/generative-ai', () => {
   const mockGenerateContent = vi.fn().mockResolvedValue({
     response: { text: () => 'Your top priority is: Design Database Schema (P1, Due Soon).' },
@@ -26,19 +25,18 @@ describe('AIAssistant', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the input field and ask button', () => {
+  it('renders the input field and submit button', () => {
     render(<AIAssistant tasks={mockTasks} />);
     expect(screen.getByRole('textbox')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /ask/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Submit question to Oracle/i })).toBeInTheDocument();
   });
 
   it('shows placeholder text when no response exists', () => {
     render(<AIAssistant tasks={mockTasks} />);
-    expect(screen.getByText(/Ask the Oracle/i)).toBeInTheDocument();
+    expect(screen.getByText(/Ask the Oracle about your active quests/i)).toBeInTheDocument();
   });
 
   it('displays loading state while waiting for response', async () => {
-    // Override the mock to hang so we can test the loading state
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const mockModel = new GoogleGenerativeAI().getGenerativeModel();
     mockModel.generateContent.mockImplementationOnce(() => new Promise(() => {}));
@@ -47,8 +45,7 @@ describe('AIAssistant', () => {
     render(<AIAssistant tasks={mockTasks} />);
     const input = screen.getByRole('textbox');
     await user.type(input, 'What are my blockers?');
-    await user.click(screen.getByRole('button', { name: /ask/i }));
-    // Loading text should briefly appear
+    await user.click(screen.getByRole('button', { name: /Submit question to Oracle/i }));
     expect(screen.getByText(/Consulting the runes/i)).toBeInTheDocument();
   });
 
@@ -56,7 +53,7 @@ describe('AIAssistant', () => {
     const user = userEvent.setup();
     render(<AIAssistant tasks={mockTasks} />);
     await user.type(screen.getByRole('textbox'), 'What should I focus on?');
-    await user.click(screen.getByRole('button', { name: /ask/i }));
+    await user.click(screen.getByRole('button', { name: /Submit question to Oracle/i }));
     await waitFor(() => {
       expect(screen.getByText(/Design Database Schema/i)).toBeInTheDocument();
     });
@@ -64,7 +61,7 @@ describe('AIAssistant', () => {
 
   it('disables submit button when input is empty', () => {
     render(<AIAssistant tasks={mockTasks} />);
-    expect(screen.getByRole('button', { name: /ask/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Submit question to Oracle/i })).toBeDisabled();
   });
 
   it('clears input after submission', async () => {
@@ -72,7 +69,12 @@ describe('AIAssistant', () => {
     render(<AIAssistant tasks={mockTasks} />);
     const input = screen.getByRole('textbox');
     await user.type(input, 'What are my blockers?');
-    await user.click(screen.getByRole('button', { name: /ask/i }));
+    await user.click(screen.getByRole('button', { name: /Submit question to Oracle/i }));
     await waitFor(() => expect(input).toHaveValue(''));
+  });
+
+  it('shows character count', () => {
+    render(<AIAssistant tasks={mockTasks} />);
+    expect(screen.getByText(/300 characters remaining/i)).toBeInTheDocument();
   });
 });
