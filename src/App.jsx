@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './index.css';
 import TaskBoard from './components/TaskBoard/TaskBoard';
 import LandingPage from './components/Auth/LandingPage';
+import AIAssistant from './components/AIAssistant/AIAssistant';
 import { useTheme } from './context/ThemeContext';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -141,14 +142,16 @@ function App() {
               </div>
             </div>
             
-            {/* AI Assistant Placeholder for later */}
+            {/* AI Assistant */}
             <div className="mt-12 glass p-8 rounded-2xl border-t-4 border-t-valhalla-gold dark:border-t-valhalla-neon">
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2 dark:text-white">
                 <span className="text-2xl">🔮</span> Oracle Insights
               </h2>
-              <p className="text-valhalla-ink/70 dark:text-gray-300">
-                Your AI Task Assistant is being summoned. Soon it will reveal hidden blockers and summarize your daily priorities here.
-              </p>
+              <AIAssistant tasks={[
+                { id: '1', title: 'Design Database Schema', status: 'todo', owner: 'Alex', priority: 'P1', confidence: 'On Track', dueDate: new Date(Date.now() + 86400000).toISOString() },
+                { id: '2', title: 'Set up GitHub Actions', status: 'in-progress', owner: 'You', priority: 'P2', confidence: 'On Track', dueDate: new Date(Date.now() + 486400000).toISOString() },
+                { id: '3', title: 'Configure Firebase Auth', status: 'blocked', owner: 'Sam', priority: 'P1', confidence: 'At Risk', dueDate: new Date(Date.now() + 864000000).toISOString() }
+              ]} />
             </div>
 
           </div>
