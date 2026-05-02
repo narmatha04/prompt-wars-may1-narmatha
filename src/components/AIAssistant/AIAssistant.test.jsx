@@ -16,9 +16,6 @@ vi.mock('@google/generative-ai', () => {
   return { GoogleGenerativeAI: MockGoogleGenerativeAI };
 });
 
-// Provide a fake API key so the module initialises the mock
-vi.stubEnv('VITE_GEMINI_API_KEY', 'test-api-key');
-
 const mockTasks = [
   { id: '1', title: 'Design Database Schema', status: 'todo', owner: 'Alex', priority: 'P1', confidence: 'On Track', dueDate: new Date(Date.now() + 86400000).toISOString() },
   { id: '2', title: 'Configure Auth', status: 'blocked', owner: 'Sam', priority: 'P1', confidence: 'At Risk', dueDate: new Date(Date.now() + 864000000).toISOString() },
@@ -41,6 +38,11 @@ describe('AIAssistant', () => {
   });
 
   it('displays loading state while waiting for response', async () => {
+    // Override the mock to hang so we can test the loading state
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const mockModel = new GoogleGenerativeAI().getGenerativeModel();
+    mockModel.generateContent.mockImplementationOnce(() => new Promise(() => {}));
+
     const user = userEvent.setup();
     render(<AIAssistant tasks={mockTasks} />);
     const input = screen.getByRole('textbox');
