@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize the Gemini API client
-// In a real production app, this should be called from a secure backend to prevent exposing the API key.
+// Initialize the Gemini API client safely
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
+const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
 
 export default function AIAssistant({ tasks = [] }) {
   const [query, setQuery] = useState('');
@@ -21,6 +21,8 @@ export default function AIAssistant({ tasks = [] }) {
     setResponse('');
 
     try {
+      if (!genAI) throw new Error("API Key is missing. The Oracle cannot awaken.");
+      
       // Create the model
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
